@@ -32,7 +32,10 @@ const trainSchema = new mongoose.Schema({
         _id:false,
         station_name:{
             type:String,
-            required: true
+            required: true,
+            trim:true,
+            lowercase: true
+            
         },
         station_code: {
             type: String,

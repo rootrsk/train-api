@@ -7,7 +7,7 @@ const {trainErrorHandler} = require('../middleware/error')
 const Station = require('../models/stations')
 const { default: axios } = require('axios')
 
-
+// Get All user 
 router.get('/admin/users', async (req, res) => {
     try {
         const users = await User.find({})
@@ -22,17 +22,18 @@ router.get('/admin/users', async (req, res) => {
         })
     }
 })
-
-router.post('/admin/stations',async(req,res)=>{
-    try {
-        const stations = new Station(req.body)
-    } catch (e) {
-        res.json({
-            message:'failed',
-            error: e.message
-        })
-    }
-})
+// // Get All Station List of India
+// router.post('/admin/stations',async(req,res)=>{
+//     try {
+//         const stations = new Station(req.body)
+//     } catch (e) {
+//         res.json({
+//             message:'failed',
+//             error: e.message
+//         })
+//     }
+// })
+// Get all stations of India
 router.post('/stations',async(req,res)=>{
     const response = await axios({
         url: 'https://gist.githubusercontent.com/apsdehal/11393083/raw/8faed8c05737c62fa04286cce21312951652fff4/Railway%2520Stations'
@@ -41,26 +42,27 @@ router.post('/stations',async(req,res)=>{
         stations : response.data.data
     })
 })
-router.post('/admin/trains', async (req, res) => {
+//Create New Train
+
+//Get Trains According To Date By sending Date and Train Id
+router.post('/admin/train-by-date',async(req,res)=>{
+    console.log(req.body)
     try {
-        const train = new Train(req.body)
-        await train.save()
-        res.send({
-            message: 'success',
-            data: {
-                train,
-                token: Math.random() * 10000000000
-            }
+        const trains = await DateTrain.find({date:req.body.date.toString()}).populate('train_id')
+        trains.map((train)=>console.log(train.date))
+        res.json({
+            message:'success',
+            data: trains
         })
     } catch (e) {
-        res.send({
-            message: 'failed',
-            error: trainErrorHandler(e.message)
+        res.json({
+            message:'failed',
+            error:e.message
         })
     }
 })
 
-//
+//Get All Trains 
 router.get('/admin/trains',async(req,res)=>{
     try {
         const trains = await Train.find({})
@@ -75,7 +77,25 @@ router.get('/admin/trains',async(req,res)=>{
         })
     }
 })
-// delete train by sending train_id in body
+//Create New Trains
+router.post('/admin/trains', async (req, res) => {
+    try {
+        const train = new Train(req.body)
+        await train.save()
+        res.send({
+            message: 'success',
+            data: {
+                train
+            }
+        })
+    } catch (e) {
+        res.send({
+            message: 'failed',
+            error: trainErrorHandler(e.message)
+        })
+    }
+})
+// Delete train by sending train_id in body
 router.delete('/admin/trains',async(req,res)=>{
     try {
         const train = await Train.findByIdAndRemove(req.body.train_id)
@@ -93,6 +113,18 @@ router.delete('/admin/trains',async(req,res)=>{
 
 
 // create train with date by sending train_id and date 
+// router.get('/admin/date-train',async(req,res)=>{
+//     try {
+//         const TrainByDate = await DateTrain.find()
+//         res.json({
+//             message:'success',
+            
+//         })
+//     } catch (e) {
+//         res.send({message:'failed',error:e.message})
+//     }
+// })
+// Create New Train According To Date By sending Date and Train_Id
 router.post('/admin/date-train',async(req,res)=>{
     try {
         const train = await Train.findById(req.body.train_id)
@@ -112,9 +144,11 @@ router.post('/admin/date-train',async(req,res)=>{
             }
         })
         await dateTrain.save()
+        const trains = await DateTrain.find({date:req.body.date}).populate('train_id')
         res.json({
             message:'success',
-            dateTrain
+            dateTrain,
+            trains
         })
     } catch (e) {
         res.json({
@@ -123,7 +157,7 @@ router.post('/admin/date-train',async(req,res)=>{
         })
     }
 })
-//delete date train by sending train_id
+//Delete Train Based on Date By Sending Train_Id
 router.delete('/admin/date-train',async(req,res)=>{
     try {
         const train = await DateTrain.findByIdAndRemove(req.body.train_id)
@@ -139,7 +173,7 @@ router.delete('/admin/date-train',async(req,res)=>{
     }
 })
 
-//get trains for user reservation
+//Get trains for user reservation
 router.get('/user/trains',async(req,res)=>{
     const match = {}
     try {
