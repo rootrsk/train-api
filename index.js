@@ -5,7 +5,7 @@ const useragent = require('express-useragent')
 const cookieParser = require('cookie-parser')
 require("dotenv").config();
 
-const PORT = process.env.PORT | 3000
+const PORT = process.env.PORT || 3000
 const userRouter = require('./src/routes/user')
 const adminRouter = require('./src/routes/admin')
 const app = express()
